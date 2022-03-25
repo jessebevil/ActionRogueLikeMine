@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class USInteractionComponent;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASCharacter : public ACharacter
@@ -20,14 +21,22 @@ public:
 
 protected:
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
+
+	USInteractionComponent* InteractionComp;
 
 	UCameraComponent* CameraComp;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float value);
+	void MoveRight(float value);
+	void PrimaryAttack();
+	void PrimaryInteract();
 
 public:
 	// Called every frame
