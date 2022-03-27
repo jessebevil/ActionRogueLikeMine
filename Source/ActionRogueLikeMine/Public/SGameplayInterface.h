@@ -24,7 +24,7 @@ class ACTIONROGUELIKEMINE_API ISGameplayInterface
 public:
 	//ImplementableEvent cannot be handled in CPP, can only be done using the blueprint events.
 	//BlueprintNativeEvent can be used both in CPP and in the blueprint editor.
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Interact(APawn* InstigatorPawn);
 
 };

@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASCharacter : public ACharacter
@@ -20,22 +21,43 @@ public:
 	ASCharacter();
 
 protected:
-
-	UPROPERTY(EditAnywhere)
+	//Category is optional
+	UPROPERTY(EditAnywhere, Category = "Attack");
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack");
+	UAnimMontage* AttackAnim;
+
+	UPROPERTY(EditAnywhere, Category = "Attack");
+	TSubclassOf<AActor> BlackHoleClass;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
+	FTimerHandle TimerHandle_BlackHoleAttack;
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
 
+	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Movement
 	void MoveForward(float value);
 	void MoveRight(float value);
+
+	//Primary Attack
 	void PrimaryAttack();
+	void PrimaryAttack_TimeElapsed();
+
+	//BlackHoleUltimate
+	void BlackHoleAttack();
+	void BlackHoleAttack_TimeElapsed();
+
+	//Interacting with objects
 	void PrimaryInteract();
 
 public:

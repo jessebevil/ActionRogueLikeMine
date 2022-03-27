@@ -64,12 +64,14 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUpDown", this, &ASCharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
+	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &ASCharacter::BlackHoleAttack);
+
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 }
 
@@ -97,6 +99,20 @@ void ASCharacter::MoveRight(float value) {
 
 //Function that controls the creation of an AActor (Projectile) at a designated location on the character.
 void ASCharacter::PrimaryAttack() {
+	//Always play the animation, should probably make sure you're not already doing the animation.
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+	//To clear the timer if you need to do so. But isn't needed for this attack.
+	//GetWorldTimerManager().ClearTimer(TimerHandle_PrimaryAttack);
+}
+
+void ASCharacter::BlackHoleAttack() {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackHoleAttack_TimeElapsed, 0.2f);
+}
+
+void ASCharacter::BlackHoleAttack_TimeElapsed() {
 	//Get the location of the right hand from the skeletal tree.
 	//Access by double clicking the skeletal mesh in the inherited mesh component of the PlayerCharacter
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
@@ -107,12 +123,31 @@ void ASCharacter::PrimaryAttack() {
 	//Create SpawnParameters and assign the collision handling method.
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+
+	//Tell the world to spawn the projectile, then transform it based on the provided spawn parameters
+	GetWorld()->SpawnActor<AActor>(BlackHoleClass, SpawnTM, SpawnParams);
+}
+
+
+void ASCharacter::PrimaryAttack_TimeElapsed() {
+	//Get the location of the right hand from the skeletal tree.
+	//Access by double clicking the skeletal mesh in the inherited mesh component of the PlayerCharacter
+	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+	//Assign where to spawn the attack using a transform matrix, assign it the hand location.
+	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+
+	//Create SpawnParameters and assign the collision handling method.
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
 
 	//Tell the world to spawn the projectile, then transform it based on the provided spawn parameters
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
 void ASCharacter::PrimaryInteract() {
-	InteractionComp->PrimaryInteract();
+	if (InteractionComp) InteractionComp->PrimaryInteract();
 }
 

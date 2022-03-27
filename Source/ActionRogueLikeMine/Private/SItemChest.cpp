@@ -15,7 +15,7 @@ ASItemChest::ASItemChest()
 	LidMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMesh"));
 	LidMesh->SetupAttachment(BaseMesh);
 
-	TargetPitch = 190;
+	TargetPitch = 110;
 
 }
 

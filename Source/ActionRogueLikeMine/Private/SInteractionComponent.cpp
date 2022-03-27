@@ -56,7 +56,6 @@ void USInteractionComponent::PrimaryInteract() {
 	if (AActor* HitActor = Hit.GetActor()) {
 		if (HitActor->Implements<USGameplayInterface>()) {
 			APawn* MyPawn = Cast<APawn>(MyOwner);
-			if (GetDistance3D)
 			ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
 		}
 	}
