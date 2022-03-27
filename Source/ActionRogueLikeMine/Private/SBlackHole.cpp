@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ASBlackHole::ASBlackHole()
@@ -20,31 +21,33 @@ ASBlackHole::ASBlackHole()
 
 	ForceComp = CreateDefaultSubobject<URadialForceComponent>("ForceComp");
 	ForceComp->SetupAttachment(SphereComp);
+	ForceComp->bIgnoreOwningActor;
+	ForceComp->ImpulseStrength = 0;
+	ForceComp->Radius = 750;
+	ForceComp->ForceStrength = -5000000;
+	//Optional, ignores 'Mass' of other objects (if false, the impulse strength will be much higher to push most objects
+	//Depending on mass
+	ForceComp->bImpulseVelChange = true;
+
+	ForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
 	EffectComp->SetupAttachment(SphereComp);
-
-
 
 	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
 	MovementComp->InitialSpeed = 400.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
 
-
+	//GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASBlackHole::BlackHoleAttack_TimeElapsed, 5.0f);
 }
 
-// Called when the game starts or when spawned
-void ASBlackHole::BeginPlay()
-{
-	Super::BeginPlay();
-
+void ASBlackHole::BlackHoleAttack_TimeElapsed() {
+	this->Destroy();
 }
 
-// Called every frame
-void ASBlackHole::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+void ASBlackHole::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpluse, const FHitResult& Hit) {
 
+	ForceComp->FireImpulse();
 }
 

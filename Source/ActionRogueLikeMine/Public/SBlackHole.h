@@ -33,11 +33,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		URadialForceComponent* ForceComp;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	FTimerHandle TimerHandle_BlackHoleAttack;
+	void BlackHoleAttack_TimeElapsed();
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION()
+		void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpluse, const FHitResult& Hit);
 
 };

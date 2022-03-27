@@ -51,11 +51,11 @@ protected:
 
 	//Primary Attack
 	void PrimaryAttack();
-	void PrimaryAttack_TimeElapsed();
+	void PrimaryAttack_CastAnimTimeElapsed();
 
 	//BlackHoleUltimate
 	void BlackHoleAttack();
-	void BlackHoleAttack_TimeElapsed();
+	void BlackHoleAttack_CastAnimTimeElapsed();
 
 	//Interacting with objects
 	void PrimaryInteract();
