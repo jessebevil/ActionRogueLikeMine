@@ -2,52 +2,44 @@
 
 
 #include "SBlackHole.h"
-#include "Components/SphereComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
-#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles//ParticleSystemComponent.h"
+#include "Logging/LogMacros.h"
 
-// Sets default values
-ASBlackHole::ASBlackHole()
-{
-
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	SphereComp->SetCollisionProfileName("Projectile");
-	RootComponent = SphereComp;
+ASBlackHole::ASBlackHole() {
+	MoveComp->InitialSpeed = 400.0f;
 
 	ForceComp = CreateDefaultSubobject<URadialForceComponent>("ForceComp");
-	ForceComp->SetupAttachment(SphereComp);
-	ForceComp->bIgnoreOwningActor;
-	ForceComp->ImpulseStrength = 0;
+	ForceComp->SetupAttachment(RootComponent);
+	ForceComp->ImpulseStrength = 5000;
+	ForceComp->bIgnoreOwningActor = true;
+	ForceComp->ForceStrength = -1000000;
 	ForceComp->Radius = 750;
-	ForceComp->ForceStrength = -5000000;
-	//Optional, ignores 'Mass' of other objects (if false, the impulse strength will be much higher to push most objects
-	//Depending on mass
 	ForceComp->bImpulseVelChange = true;
-
-	ForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
-
-	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
-	EffectComp->SetupAttachment(SphereComp);
-
-	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
-	MovementComp->InitialSpeed = 400.0f;
-	MovementComp->bRotationFollowsVelocity = true;
-	MovementComp->bInitialVelocityInLocalSpace = true;
-
-	//GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASBlackHole::BlackHoleAttack_TimeElapsed, 5.0f);
+	DetonationDelay = 5.0f;
 }
 
-void ASBlackHole::BlackHoleAttack_TimeElapsed() {
-	this->Destroy();
+void ASBlackHole::BeginPlay() {
+	Super::BeginPlay();
+
+	GetWorldTimerManager().SetTimer(TimerHandle_DelayedDetonate, this, &ASBlackHole::Explode, DetonationDelay);
 }
 
-void ASBlackHole::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpluse, const FHitResult& Hit) {
+void ASBlackHole::Explode_Implementation() {
+	if (IsPendingKill())
+		return;
 
-	ForceComp->FireImpulse();
+	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
+
+	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+
+	EffectComp->DeactivateSystem();
+	ForceComp->FireImpulse();//Explode everything that it's captured outward.
+
+	MoveComp->StopMovementImmediately();
+	SetActorEnableCollision(false);
+	Super::Explode_Implementation();
 }
 
+void ASBlackHole::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {}

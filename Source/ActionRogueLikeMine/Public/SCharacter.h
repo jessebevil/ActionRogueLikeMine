@@ -10,6 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USInteractionComponent;
 class UAnimMontage;
+class UAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASCharacter : public ACharacter
@@ -31,8 +32,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack");
 	TSubclassOf<AActor> BlackHoleClass;
 
+	UPROPERTY(EditAnywhere, Category = "Attack");
+	TSubclassOf<AActor> DashClass;
+
 	FTimerHandle TimerHandle_PrimaryAttack;
 	FTimerHandle TimerHandle_BlackHoleAttack;
+	FTimerHandle TimerHandle_Dash;
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
@@ -42,8 +47,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAttributeComponent* AttributeComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 
 	//Movement
 	void MoveForward(float value);
@@ -56,6 +67,10 @@ protected:
 	//BlackHoleUltimate
 	void BlackHoleAttack();
 	void BlackHoleAttack_CastAnimTimeElapsed();
+
+	//Dash
+	void Dash();
+	void Dash_CastAnimTimeElapsed();
 
 	//Interacting with objects
 	void PrimaryInteract();

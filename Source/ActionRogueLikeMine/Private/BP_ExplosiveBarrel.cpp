@@ -43,12 +43,12 @@ void ABP_ExplosiveBarrel::OnActorHit(UPrimitiveComponent* HitComponent, AActor* 
 	FString OtherActorName = GetNameSafe(OtherActor);
 	if (OtherActorName.StartsWith("Player") == false) {
 		ForceComp->FireImpulse();
-		UE_LOG(LogTemp, Log, TEXT("OnActorHit in Explosive Barrel"));
-		UE_LOG(LogTemp, Log, TEXT("OtherActor: %s, at game time: %2.2f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);
+		/*UE_LOG(LogTemp, Log, TEXT("OnActorHit in Explosive Barrel"));
+		UE_LOG(LogTemp, Log, TEXT("OtherActor: %s, at game time: %2.2f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);*/
 
 		/*FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
 		DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.0f, true);*/
-		FString Output = FString::Printf(TEXT("OtherActor: %s, at game time: %2.2f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds, *Hit.ImpactPoint.ToString());
-		DrawDebugString(GetWorld(), Hit.ImpactPoint, Output);
+		/*FString Output = FString::Printf(TEXT("OtherActor: %s, at game time: %2.2f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds, *Hit.ImpactPoint.ToString());
+		DrawDebugString(GetWorld(), Hit.ImpactPoint, Output);*/
 	}
 }

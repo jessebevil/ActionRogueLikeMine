@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SInteractionComponent.h"
+#include "AttributeComponent.h"
+#include "GameFramework/Actor.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -24,9 +26,80 @@ ASCharacter::ASCharacter()
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("InteractionComp");
 
+	AttributeComp = CreateDefaultSubobject<UAttributeComponent>("AttributeComp");
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
+
+}
+
+//Function that controls the creation of an AActor (Projectile) at a designated location on the character.
+void ASCharacter::PrimaryAttack() {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_CastAnimTimeElapsed, 0.2f);
+}
+
+void ASCharacter::PrimaryAttack_CastAnimTimeElapsed() {
+	SpawnProjectile(ProjectileClass);
+}
+
+void ASCharacter::BlackHoleAttack() {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackHoleAttack_CastAnimTimeElapsed, 0.2f);
+}
+
+void ASCharacter::BlackHoleAttack_CastAnimTimeElapsed() {
+	SpawnProjectile(BlackHoleClass);
+}
+
+void ASCharacter::Dash() {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_CastAnimTimeElapsed, 0.2f);
+}
+
+void ASCharacter::Dash_CastAnimTimeElapsed() {
+	SpawnProjectile(DashClass);
+}
+
+void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn) {
+	if (ensureAlways(ClassToSpawn)) {
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		FCollisionShape Shape;
+		Shape.SetSphere(20.0f);
+
+		//Ignore Player
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		FCollisionObjectQueryParams ObjectParams;
+		ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjectParams.AddObjectTypesToQuery(ECC_Pawn);
+
+		FVector TraceStart = CameraComp->GetComponentLocation();
+
+		//endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+
+		//find new direction/rotation from hand pointing to impact point in world.
+		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+
+		FHitResult Hit;
+		// returns true if we got to a blocking hit
+		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectParams, Shape, Params)) {
+			// Overwrite TraceEnd with impact point in world
+			TraceEnd = Hit.ImpactPoint;
+		}
+
+		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -71,6 +144,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &ASCharacter::BlackHoleAttack);
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
 
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 }
@@ -95,55 +169,6 @@ void ASCharacter::MoveRight(float value) {
 
 	FVector RightVector = FRotationMatrix(controlRot).GetScaledAxis(EAxis::Y);
 	AddMovementInput(RightVector, value);
-}
-
-//Function that controls the creation of an AActor (Projectile) at a designated location on the character.
-void ASCharacter::PrimaryAttack() {
-	//Always play the animation, should probably make sure you're not already doing the animation.
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_CastAnimTimeElapsed, 0.2f);
-
-	//To clear the timer if you need to do so. But isn't needed for this attack.
-	//GetWorldTimerManager().ClearTimer(TimerHandle_PrimaryAttack);
-}
-
-void ASCharacter::PrimaryAttack_CastAnimTimeElapsed() {
-	//Get the location of the right hand from the skeletal tree.
-	//Access by double clicking the skeletal mesh in the inherited mesh component of the PlayerCharacter
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-
-	//Assign where to spawn the attack using a transform matrix, assign it the hand location.
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
-
-	//Create SpawnParameters and assign the collision handling method.
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	//Tell the world to spawn the projectile, then transform it based on the provided spawn parameters
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
-}
-
-void ASCharacter::BlackHoleAttack() {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::BlackHoleAttack_CastAnimTimeElapsed, 0.2f);
-}
-
-void ASCharacter::BlackHoleAttack_CastAnimTimeElapsed() {
-	//Get the location of the right hand from the skeletal tree.
-	//Access by double clicking the skeletal mesh in the inherited mesh component of the PlayerCharacter
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-
-	//Assign where to spawn the attack using a transform matrix, assign it the hand location.
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
-
-	//Create SpawnParameters and assign the collision handling method.
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	//Tell the world to spawn the projectile, then transform it based on the provided spawn parameters
-	GetWorld()->SpawnActor<AActor>(BlackHoleClass, SpawnTM, SpawnParams);
 }
 
 void ASCharacter::PrimaryInteract() {

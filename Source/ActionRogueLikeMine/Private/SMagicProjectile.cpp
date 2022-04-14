@@ -5,24 +5,37 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "AttributeComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASMagicProjectile::ASMagicProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	MoveComp->InitialSpeed = 5000;
+}
 
-	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	SphereComp->SetCollisionProfileName("Projectile");
-	RootComponent = SphereComp;
+void ASMagicProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	if (OtherActor) {
+		UAttributeComponent* AttributeComp = Cast<UAttributeComponent>(OtherActor->GetComponentByClass(UAttributeComponent::StaticClass()));
+		if (AttributeComp) {
+			AttributeComp->ApplyHealthChange(-20.0f);
+			Destroy();
+		}
+		Explode();
+	}
+}
 
-	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
-	EffectComp->SetupAttachment(SphereComp);
+void ASMagicProjectile::Explode_Implementation() {
+	if (IsPendingKill())
+		return;
 
-	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
-	MovementComp->InitialSpeed = 1000.0f;
-	MovementComp->bRotationFollowsVelocity = true;
-	MovementComp->bInitialVelocityInLocalSpace = true;
+	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+
+	EffectComp->DeactivateSystem();
+
+	MoveComp->StopMovementImmediately();
+	SetActorEnableCollision(false);
+	Super::Explode_Implementation();
 }
 
 // Called when the game starts or when spawned

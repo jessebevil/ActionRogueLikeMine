@@ -3,40 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "SProjectileBase.h"
 #include "SBlackHole.generated.h"
 
-class USphereComponent;
-class UProjectileMovementComponent;
-class UParticleSystemComponent;
 class URadialForceComponent;
 
+
 UCLASS()
-class ACTIONROGUELIKEMINE_API ASBlackHole : public AActor
+class ACTIONROGUELIKEMINE_API ASBlackHole : public ASProjectileBase
 {
 	GENERATED_BODY()
-
 public:
-	// Sets default values for this actor's properties
 	ASBlackHole();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		USphereComponent* SphereComp;
+	UPROPERTY(EditDefaultsOnly, Category = "Explode")
+	float DetonationDelay;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		UProjectileMovementComponent* MovementComp;
+	UPROPERTY(EditDefaultsOnly, Category = "ForceComp")
+	URadialForceComponent* ForceComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		UParticleSystemComponent* EffectComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		URadialForceComponent* ForceComp;
-
-	FTimerHandle TimerHandle_BlackHoleAttack;
-	void BlackHoleAttack_TimeElapsed();
-
-	UFUNCTION()
-		void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpluse, const FHitResult& Hit);
-
+	FTimerHandle TimerHandle_DelayedDetonate;
+	virtual void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+	virtual void Explode_Implementation() override;
+	virtual void BeginPlay() override;
 };
