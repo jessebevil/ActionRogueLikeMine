@@ -34,6 +34,12 @@ ASCharacter::ASCharacter()
 
 }
 
+void ASCharacter::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+}
+
 //Function that controls the creation of an AActor (Projectile) at a designated location on the character.
 void ASCharacter::PrimaryAttack() {
 	PlayAnimMontage(AttackAnim);
@@ -173,5 +179,12 @@ void ASCharacter::MoveRight(float value) {
 
 void ASCharacter::PrimaryInteract() {
 	if (InteractionComp) InteractionComp->PrimaryInteract();
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta) {
+	if (NewHealth <= 0 && Delta < 0.0f) {
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
 }
 

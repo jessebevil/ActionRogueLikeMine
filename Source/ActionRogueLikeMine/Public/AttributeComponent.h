@@ -38,6 +38,9 @@ protected:
 	//HealthMax, Stamina, Strength, Mana, Crit chance, etc.
 
 public:
+	UFUNCTION(BlueprintCallable)
+	bool IsAlive() const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 

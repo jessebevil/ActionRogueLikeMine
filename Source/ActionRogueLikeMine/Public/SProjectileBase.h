@@ -32,6 +32,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UParticleSystemComponent* EffectComp;
 
+	//UPROPERTY(VisibleAnywhere, EditDefaultsOnly, Category = "Audio")
+	//UAudioComponent* ProjectileAudioComp;
+
+	//UPROPERTY(VisibleAnywhere, EditDefaultsOnly, Category = "Audio")
+	//UAudioComponent* ImpactAudioComp;
+
 	UFUNCTION()
 	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
