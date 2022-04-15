@@ -10,6 +10,7 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
 class UAttributeComponent;
+//class UAudioComponent;
 
 UCLASS(ABSTRACT)
 class ACTIONROGUELIKEMINE_API ASProjectileBase : public AActor

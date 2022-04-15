@@ -15,7 +15,8 @@ ASMagicProjectile::ASMagicProjectile()
 }
 
 void ASMagicProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
-	if (OtherActor && OtherActor != GetInstigator()) {
+	auto pInstigator = GetInstigator();
+	if (OtherActor && OtherActor != pInstigator) {
 		UAttributeComponent* AttributeComp = Cast<UAttributeComponent>(OtherActor->GetComponentByClass(UAttributeComponent::StaticClass()));
 		if (AttributeComp) {
 			AttributeComp->ApplyHealthChange(-20.0f);

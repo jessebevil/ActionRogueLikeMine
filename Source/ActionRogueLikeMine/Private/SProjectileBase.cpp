@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Logging/LogMacros.h"
 #include "AttributeComponent.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ASProjectileBase::ASProjectileBase()
@@ -27,8 +28,10 @@ ASProjectileBase::ASProjectileBase()
 	MoveComp->ProjectileGravityScale = 0.0f;
 	MoveComp->InitialSpeed = 400;
 
-	/*ImpactAudioComp;
-	ProjectileAudioComp;*/
+	//ImpactAudioComp = CreateDefaultSubobject<UAudioComponent>("ImpactAudioComp");
+	//ImpactAudioComp->SetupAttachment(RootComponent);
+	//ProjectileAudioComp = CreateDefaultSubobject<UAudioComponent>("ImpactAudioComp");
+	//ProjectileAudioComp->SetupAttachment(RootComponent);
 }
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
@@ -36,7 +39,8 @@ void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Oth
 }
 
 void ASProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if (OtherActor && OtherActor != GetInstigator()) {
+	auto pInstigator = GetInstigator();
+	if (OtherActor && OtherActor != pInstigator) {
 		UAttributeComponent* AttributeComp = Cast<UAttributeComponent>(OtherActor->GetComponentByClass(UAttributeComponent::StaticClass()));
 		if (AttributeComp) {
 			AttributeComp->ApplyHealthChange(-20.0f);
