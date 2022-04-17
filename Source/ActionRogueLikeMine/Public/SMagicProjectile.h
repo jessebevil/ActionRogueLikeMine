@@ -17,7 +17,6 @@ public:
 	ASMagicProjectile();
 
 protected:
-	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void Explode_Implementation() override;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

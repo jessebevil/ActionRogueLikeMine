@@ -14,18 +14,6 @@ ASMagicProjectile::ASMagicProjectile()
 	MoveComp->InitialSpeed = 5000;
 }
 
-void ASMagicProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
-	auto pInstigator = GetInstigator();
-	if (OtherActor && OtherActor != pInstigator) {
-		UAttributeComponent* AttributeComp = Cast<UAttributeComponent>(OtherActor->GetComponentByClass(UAttributeComponent::StaticClass()));
-		if (AttributeComp) {
-			AttributeComp->ApplyHealthChange(-20.0f);
-			Destroy();
-		}
-		Explode();
-	}
-}
-
 void ASMagicProjectile::Explode_Implementation() {
 	if (IsPendingKill())
 		return;
