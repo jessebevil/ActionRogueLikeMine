@@ -32,6 +32,10 @@ ASCharacter::ASCharacter()
 
 	bUseControllerRotationYaw = false;
 
+	AttackAnimDelay = 0.2f;
+	TimeToHitParamName = "TimeToHit";//WTf is this for?
+	HandSocketName = "Muzzle_01";
+
 }
 
 void ASCharacter::PostInitializeComponents() {
@@ -42,8 +46,8 @@ void ASCharacter::PostInitializeComponents() {
 
 //Function that controls the creation of an AActor (Projectile) at a designated location on the character.
 void ASCharacter::PrimaryAttack() {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_CastAnimTimeElapsed, 0.2f);
+	StartAttackEffects();
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_CastAnimTimeElapsed, AttackAnimDelay);
 }
 
 void ASCharacter::PrimaryAttack_CastAnimTimeElapsed() {
@@ -51,8 +55,8 @@ void ASCharacter::PrimaryAttack_CastAnimTimeElapsed() {
 }
 
 void ASCharacter::BlackHoleAttack() {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackHoleAttack_CastAnimTimeElapsed, 0.2f);
+	StartAttackEffects();
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackHoleAttack_CastAnimTimeElapsed, AttackAnimDelay);
 }
 
 void ASCharacter::BlackHoleAttack_CastAnimTimeElapsed() {
@@ -60,17 +64,22 @@ void ASCharacter::BlackHoleAttack_CastAnimTimeElapsed() {
 }
 
 void ASCharacter::Dash() {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_CastAnimTimeElapsed, 0.2f);
+	StartAttackEffects();
+	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_CastAnimTimeElapsed, AttackAnimDelay);
 }
 
 void ASCharacter::Dash_CastAnimTimeElapsed() {
 	SpawnProjectile(DashClass);
 }
 
+void ASCharacter::StartAttackEffects() {
+	PlayAnimMontage(AttackAnim);
+	UGameplayStatics::SpawnEmitterAttached(CastingEffect, GetMesh(), HandSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
+}
+
 void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn) {
 	if (ensureAlways(ClassToSpawn)) {
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -91,7 +100,7 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn) {
 		FVector TraceStart = CameraComp->GetComponentLocation();
 
 		//endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 2500);
 
 		//find new direction/rotation from hand pointing to impact point in world.
 		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
@@ -182,6 +191,10 @@ void ASCharacter::PrimaryInteract() {
 }
 
 void ASCharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta) {
+	if (Delta < 0.0f) {
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+	}
+
 	if (NewHealth <= 0 && Delta < 0.0f) {
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
