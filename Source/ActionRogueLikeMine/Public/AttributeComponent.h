@@ -34,6 +34,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes");
 	float Health;
+	float HealthMax;
 
 	//HealthMax, Stamina, Strength, Mana, Crit chance, etc.
 
@@ -46,5 +47,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Attribute")
 	bool ApplyHealthChange(float Delta);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsFullHealth() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealthMax() const;
 
 };
