@@ -15,9 +15,11 @@ class ACTIONROGUELIKEMINE_API ASPowerup_HealthPotion : public ASPowerupActor
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* MeshComp;
 
+public:
 	void Interact_Implementation(APawn* InstigatorPawn) override;
-
+	ASPowerup_HealthPotion();
 	
 };

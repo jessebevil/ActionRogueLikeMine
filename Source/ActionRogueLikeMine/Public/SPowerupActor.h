@@ -9,7 +9,7 @@
 
 class USphereComponent;
 
-UCLASS()
+UCLASS(ABSTRACT)
 class ACTIONROGUELIKEMINE_API ASPowerupActor : public AActor, public ISGameplayInterface
 {
 	GENERATED_BODY()
