@@ -15,10 +15,11 @@ bool UAttributeComponent::IsAlive() const {
 }
 
 bool UAttributeComponent::ApplyHealthChange(float Delta) {
-	float oldHealth = Health;
-	float ActualDelta = Health - oldHealth;
+	float oldHealth = Health;//Save original health for later.
 
 	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
+
+	float ActualDelta = Health - oldHealth;//Compare old health with new health to see if there was a change.
 
 	OnHealthChanged.Broadcast(nullptr, this, Health, Delta);
 

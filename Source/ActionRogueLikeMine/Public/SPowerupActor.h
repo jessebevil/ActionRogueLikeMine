@@ -9,7 +9,7 @@
 
 class USphereComponent;
 
-UCLASS(ABSTRACT)
+UCLASS()
 class ACTIONROGUELIKEMINE_API ASPowerupActor : public AActor, public ISGameplayInterface
 {
 	GENERATED_BODY()
@@ -17,7 +17,7 @@ class ACTIONROGUELIKEMINE_API ASPowerupActor : public AActor, public ISGameplayI
 public:	
 	// Sets default values for this actor's properties
 	ASPowerupActor();
-	void Interact_Implementation(APawn* IntigatorPawn);
+	void Interact_Implementation(APawn* IntigatorPawn) override;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Powerup")
