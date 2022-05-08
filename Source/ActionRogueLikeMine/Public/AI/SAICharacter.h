@@ -7,6 +7,7 @@
 #include "SAICharacter.generated.h"
 
 class UPawnSensingComponent;
+class UAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASAICharacter : public ACharacter
@@ -18,7 +19,15 @@ public:
 	ASAICharacter();
 
 protected:
+	void SetTargetActor(AActor* NewTarget);
+
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UPROPERTY(VisibleAnywhere, Category = "Effects")
+	FName TimeToHitParamName;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
