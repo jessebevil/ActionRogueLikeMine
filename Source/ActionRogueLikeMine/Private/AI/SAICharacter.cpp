@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
+#include "SWorldUserWidget.h"
 
 // Sets default values
 ASAICharacter::ASAICharacter()
@@ -16,6 +17,7 @@ ASAICharacter::ASAICharacter()
     AttributeComp = CreateDefaultSubobject<UAttributeComponent>("AttributeComp");
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    TimeToHitParamName = "TimeToHit";
 }
 
 void ASAICharacter::SetTargetActor(AActor* NewTarget) {
@@ -41,8 +43,17 @@ void ASAICharacter::OnPawnSeen(APawn* Pawn) {
 void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta) {
     if (Delta < 0.0f) {
         GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+        
         if (InstigatorActor != this) {
             SetTargetActor(InstigatorActor);
+        }
+
+        if (ActiveHealthBar == nullptr) {
+            ActiveHealthBar = CreateWidget<USWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+            if (ActiveHealthBar) {
+                ActiveHealthBar->AttachedActor = this;
+                ActiveHealthBar->AddToViewport();
+            }
         }
 
         if (NewHealth <= 0) {

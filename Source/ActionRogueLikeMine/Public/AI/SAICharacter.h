@@ -8,6 +8,8 @@
 
 class UPawnSensingComponent;
 class UAttributeComponent;
+class UUserWidget;
+class USWorldUserWidget;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASAICharacter : public ACharacter
@@ -25,6 +27,11 @@ protected:
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI");
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	USWorldUserWidget* ActiveHealthBar;
 
 	UPROPERTY(VisibleAnywhere, Category = "Effects")
 	FName TimeToHitParamName;
