@@ -20,6 +20,9 @@ public:
 	ASProjectileBase();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute")
+	float Damage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")
 	TSubclassOf<UCameraShakeBase> ImpactShake;
 
