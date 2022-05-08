@@ -15,11 +15,11 @@ void ASPowerup_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
 		return;
 	}
 
-	UAttributeComponent* AttributeComp = Cast<UAttributeComponent>(InstigatorPawn->GetComponentByClass(UAttributeComponent::StaticClass()));
+	UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(InstigatorPawn);
 	// Check if not already at max health
 	if (ensure(AttributeComp) && !AttributeComp->IsFullHealth()) {
 		// Only activate if healed successfully
-		if (AttributeComp->ApplyHealthChange(AttributeComp->GetHealthMax())) {
+		if (AttributeComp->ApplyHealthChange(this, AttributeComp->GetHealthMax())) {
 			HideAndCooldownPowerup();
 		}
 	}
