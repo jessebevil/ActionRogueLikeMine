@@ -40,6 +40,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes");
 	float Health;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes");
 	float HealthMax;
 
 	//HealthMax, Stamina, Strength, Mana, Crit chance, etc.
