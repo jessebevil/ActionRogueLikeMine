@@ -2,6 +2,10 @@
 
 
 #include "AttributeComponent.h"
+#include "SGameModeBase.h"
+
+//Console Commands - Cheats
+static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplier"), 1.0f, TEXT("Global damage modifier for attribute component."), ECVF_Cheat);
 
 bool UAttributeComponent::IsActorAlive(AActor* Actor) {
 	UAttributeComponent* AttributeComp = GetAttributes(Actor);
@@ -19,6 +23,10 @@ UAttributeComponent::UAttributeComponent()
 	Health = HealthMax;
 }
 
+bool UAttributeComponent::Kill(AActor* IntigatorActor) {
+	return ApplyHealthChange(IntigatorActor, -GetHealthMax());
+}
+
 bool UAttributeComponent::IsAlive() const {
 	return Health > 0.0f;
 }
@@ -27,11 +35,24 @@ bool UAttributeComponent::IsFullHealth() const {
 	return Health == HealthMax;
 }
 
+float UAttributeComponent::GetHealth() {
+	return Health;
+}
+
 float UAttributeComponent::GetHealthMax() const {
 	return HealthMax;
 }
 
 bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta) {
+	if (!GetOwner()->CanBeDamaged()) {//Console command for God mode. 
+		return false;
+	}
+
+	if (Delta < 0.0f) {
+		float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
+		Delta *= DamageMultiplier;
+	}
+
 	float oldHealth = Health;//Save original health for later.
 
 	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
@@ -39,6 +60,13 @@ bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta
 	float ActualDelta = Health - oldHealth;//Compare old health with new health to see if there was a change.
 
 	OnHealthChanged.Broadcast(InstigatorActor, this, Health, Delta);
+
+	if (ActualDelta < 0 && Health == 0.0f) {
+		ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+		if (GM) {
+			GM->OnActorKilled(GetOwner(), InstigatorActor);
+		}
+	}
 
 	return ActualDelta != 0;//maybe check if the delta did anything? Did they live?
 }

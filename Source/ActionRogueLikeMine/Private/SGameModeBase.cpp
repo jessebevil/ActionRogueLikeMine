@@ -8,6 +8,9 @@
 #include "AttributeComponent.h"
 #include "EngineUtils.h"
 #include "DrawDebugHelpers.h"
+#include "SCharacter.h"
+
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ASGameModeBase::ASGameModeBase() {
 	SpawnTimerInterval = 2.0f;
@@ -19,7 +22,22 @@ void ASGameModeBase::StartPlay() {
 	GetWorldTimerManager().SetTimer(TimerHandle_SpawnBots, this, &ASGameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 }
 
+void ASGameModeBase::KillAll() {
+	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It) {
+		ASAICharacter* Bot = *It;
+
+		UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(Bot);
+		if (ensure(AttributeComp) && AttributeComp->IsAlive()) {
+			AttributeComp->Kill(this);
+		}
+	}
+}
+
 void ASGameModeBase::SpawnBotTimerElapsed() {
+	if (!CVarSpawnBots.GetValueOnGameThread()) {//Is bot spawning enabled?
+		UE_LOG(LogTemp, Warning, TEXT("Bot spawning disabled via cvar 'CVarSpawnBots'."));
+		return;
+	}
 
 	int32 NrOfAliveBots = 0;
 	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It) {
@@ -61,5 +79,25 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 	if (Locations.IsValidIndex(0)) {
 		GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
 		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
+	}
+}
+
+void ASGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer) {
+	ASCharacter* Player = Cast<ASCharacter>(VictimActor);
+	if (Player) {
+		FTimerHandle TimerHandle_RespawnDelay;
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());
+		float RespawnDelay = 2.0f;
+		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
+	}
+	UE_LOG(LogTemp, Log, TEXT("OnActorKilled:: %s was killed by %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
+}
+
+void ASGameModeBase::RespawnPlayerElapsed(AController* Controller) {
+	if (ensure(Controller)) {
+		Controller->UnPossess();
+
+		RestartPlayer(Controller);
 	}
 }

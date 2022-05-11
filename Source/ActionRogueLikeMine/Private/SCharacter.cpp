@@ -164,6 +164,10 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 }
 
+void ASCharacter::HealSelf(float Amount /* = 100 */) {
+	AttributeComp->ApplyHealthChange(this, Amount);
+}
+
 	// X = Forward/Back (Red)
 	// Y = Right/Left (Green)
 	// Z = Up/Down (Blue)
