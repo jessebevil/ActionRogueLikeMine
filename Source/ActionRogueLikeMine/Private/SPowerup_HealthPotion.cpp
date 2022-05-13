@@ -5,15 +5,16 @@
 #include "AttributeComponent.h"
 
 ASPowerup_HealthPotion::ASPowerup_HealthPotion() {
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshComp");
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	MeshComp->SetupAttachment(RootComponent);
+
 }
 
 void ASPowerup_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
 	if (!ensure(InstigatorPawn)) {
 		return;
 	}
+
+	//Logic to handle Coin spending, allowing for a cost associated with health potions.
+	//Still need logic to keep, track, spend coins in the first place. So TODO:
 
 	UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(InstigatorPawn);
 	// Check if not already at max health

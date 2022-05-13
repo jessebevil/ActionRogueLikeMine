@@ -3,12 +3,14 @@
 
 #include "AI/SAICharacter.h"
 #include "Perception/PawnSensingComponent.h"
-#include "AttributeComponent.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
+#include "AttributeComponent.h"
+#include "BrainComponent.h"
 #include "SWorldUserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ASAICharacter::ASAICharacter()
@@ -17,6 +19,10 @@ ASAICharacter::ASAICharacter()
     AttributeComp = CreateDefaultSubobject<UAttributeComponent>("AttributeComp");
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+    GetMesh()->SetGenerateOverlapEvents(true);
+
     TimeToHitParamName = "TimeToHit";
 }
 
@@ -56,6 +62,8 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent
             }
         }
 
+        GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+
         if (NewHealth <= 0) {
             //Stop BT
             AAIController* AIC = Cast<AAIController>(GetController());
@@ -66,6 +74,9 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent
             //Ragdoll
             GetMesh()->SetAllBodiesSimulatePhysics(true);
             GetMesh()->SetCollisionProfileName("Ragdoll");
+
+            GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            GetCharacterMovement()->DisableMovement();
 
             //Set lifespan
             SetLifeSpan(10.0f);

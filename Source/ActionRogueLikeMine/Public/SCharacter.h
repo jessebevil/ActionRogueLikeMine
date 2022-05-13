@@ -12,6 +12,7 @@ class USInteractionComponent;
 class UAnimMontage;
 class UAttributeComponent;
 class UParticleSystem;
+class USActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASCharacter : public ACharacter
@@ -63,14 +64,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UAttributeComponent* AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 
 	//Movement
-	void MoveForward(float value);
-	void MoveRight(float value);
+	void MoveForward(float value);//ForwardAndBackwards
+	void MoveRight(float value);//RightAndLeft
+
+	//Sprint
+	void SprintStart();
+	void SprintStop();
 
 	//Primary Attack
 	void PrimaryAttack();
@@ -94,6 +102,8 @@ protected:
 	void OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	virtual void PostInitializeComponents() override;
+
+	virtual FVector GetPawnViewLocation() const override;
 
 public:
 	// Called every frame

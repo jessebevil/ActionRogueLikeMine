@@ -10,6 +10,7 @@
 #include "SInteractionComponent.h"
 #include "AttributeComponent.h"
 #include "GameFramework/Actor.h"
+#include "SActionComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -28,6 +29,8 @@ ASCharacter::ASCharacter()
 
 	AttributeComp = CreateDefaultSubobject<UAttributeComponent>("AttributeComp");
 
+	ActionComp = CreateDefaultSubobject<USActionComponent>("ActionComp");
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
@@ -42,6 +45,10 @@ void ASCharacter::PostInitializeComponents() {
 	Super::PostInitializeComponents();
 
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+}
+
+FVector ASCharacter::GetPawnViewLocation() const {
+	return CameraComp->GetComponentLocation();
 }
 
 //Function that controls the creation of an AActor (Projectile) at a designated location on the character.
@@ -100,7 +107,7 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn) {
 		FVector TraceStart = CameraComp->GetComponentLocation();
 
 		//endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 2500);
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 10000);
 
 		//find new direction/rotation from hand pointing to impact point in world.
 		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
@@ -152,7 +159,6 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUpDown", this, &ASCharacter::AddControllerPitchInput);
@@ -160,8 +166,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &ASCharacter::BlackHoleAttack);
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
-
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::SprintStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::SprintStop);
+
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::Jump);
 }
 
 void ASCharacter::HealSelf(float Amount /* = 100 */) {
@@ -188,6 +198,14 @@ void ASCharacter::MoveRight(float value) {
 
 	FVector RightVector = FRotationMatrix(controlRot).GetScaledAxis(EAxis::Y);
 	AddMovementInput(RightVector, value);
+}
+
+void ASCharacter::SprintStart() {
+	ActionComp->StartActionByName(this, "Sprint");
+}
+
+void ASCharacter::SprintStop() {
+	ActionComp->StopActionByName(this, "Sprint");
 }
 
 void ASCharacter::PrimaryInteract() {

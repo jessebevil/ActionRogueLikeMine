@@ -20,6 +20,13 @@ public:
 	void Interact_Implementation(APawn* IntigatorPawn) override;
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USphereComponent* SphereComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* MeshComp;
+
+	
 	UPROPERTY(EditAnywhere, Category = "Powerup")
 	float RespawnTime;
 
@@ -31,7 +38,4 @@ protected:
 	void HideAndCooldownPowerup();
 
 	void SetPowerupState(bool bNewIsActive);
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USphereComponent* SphereComp;
 };

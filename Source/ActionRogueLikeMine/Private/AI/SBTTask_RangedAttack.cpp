@@ -8,7 +8,7 @@
 #include "AttributeComponent.h"
 
 USBTTask_RangedAttack::USBTTask_RangedAttack() {
-	MaxBulletSpread = 5.0f;
+	MaxBulletSpread = 2.5f;
 }
 
 EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {

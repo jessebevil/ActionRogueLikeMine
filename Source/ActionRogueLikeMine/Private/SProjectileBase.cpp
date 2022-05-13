@@ -10,6 +10,9 @@
 #include "Sound/SoundCue.h"
 #include "Camera/CameraShakeBase.h"
 #include "AttributeComponent.h"
+#include "SGameplayFunctionLibrary.h"
+
+static TAutoConsoleVariable<bool> CVarDebugProjectileHits(TEXT("su.DebugProjectileHits"), false, TEXT("Enable debug lines for Projectile Hits base class."), ECVF_Cheat);
 
 // Sets default values
 ASProjectileBase::ASProjectileBase()
@@ -35,21 +38,42 @@ ASProjectileBase::ASProjectileBase()
 	ImpactShakeInnerRadius = 0.0f;
 	ImpactShakeOuterRadius = 1500.0f;
 
-	Damage = -20.0f;
+	Damage = 20.0f;
 }
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	
+	auto pInstigator = GetInstigator();
+	if (OtherActor && OtherActor != pInstigator) {
+		bool bDebugDraw = CVarDebugProjectileHits.GetValueOnGameThread();
+		if (bDebugDraw)
+			UE_LOG(LogTemp, Log, TEXT("ProjectileBase::OnActorHit - %s hit %s"), *GetNameSafe(pInstigator), *GetNameSafe(OtherActor));
+
+		if (USGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, Hit)) {
+			Explode();
+		}
+	}
 	Explode();
 }
 
 void ASProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	auto pInstigator = GetInstigator();
-	if (OtherActor && OtherActor != pInstigator) {
+	/*if (OtherActor && OtherActor != pInstigator) {
 		UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(OtherActor);
 		if (AttributeComp) {
 			AttributeComp->ApplyHealthChange(GetInstigator(), Damage);
 		}
 		Explode();
+	}*/
+
+	if (OtherActor && OtherActor != pInstigator) {
+		bool bDebugDraw = CVarDebugProjectileHits.GetValueOnGameThread();
+		if (bDebugDraw)
+			UE_LOG(LogTemp, Log, TEXT("ProjectileBase::OnActorHit - %s hit %s for %.2f"), *GetNameSafe(pInstigator), *GetNameSafe(OtherActor), Damage);
+
+		if (USGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult)) {
+			Explode();
+		}
 	}
 }
 
