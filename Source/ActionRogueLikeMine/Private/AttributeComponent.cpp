@@ -44,7 +44,7 @@ float UAttributeComponent::GetHealthMax() const {
 }
 
 bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta) {
-	if (!GetOwner()->CanBeDamaged()) {//Console command for God mode. 
+	if (!GetOwner()->CanBeDamaged() && Delta < 0.0f) {//Console command for God mode. 
 		return false;
 	}
 
