@@ -20,8 +20,9 @@ void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	for (TSubclassOf<USAction> ActionClass : DefaultActions) {
+		AddAction(ActionClass);
+	}	
 }
 
 
@@ -34,7 +35,7 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 }
 
 void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass) {
-	if (ensure(ActionClass)) {
+	if (!ensure(ActionClass)) {
 		return;
 	}
 

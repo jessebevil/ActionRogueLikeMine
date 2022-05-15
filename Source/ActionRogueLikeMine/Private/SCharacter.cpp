@@ -35,9 +35,7 @@ ASCharacter::ASCharacter()
 
 	bUseControllerRotationYaw = false;
 
-	AttackAnimDelay = 0.2f;
 	TimeToHitParamName = "TimeToHit";//WTf is this for?
-	HandSocketName = "Muzzle_01";
 
 }
 
@@ -53,104 +51,38 @@ FVector ASCharacter::GetPawnViewLocation() const {
 
 //Function that controls the creation of an AActor (Projectile) at a designated location on the character.
 void ASCharacter::PrimaryAttack() {
-	StartAttackEffects();
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_CastAnimTimeElapsed, AttackAnimDelay);
-}
-
-void ASCharacter::PrimaryAttack_CastAnimTimeElapsed() {
-	SpawnProjectile(ProjectileClass);
+	ActionComp->StartActionByName(this, "PrimaryAttack");
 }
 
 void ASCharacter::BlackHoleAttack() {
-	StartAttackEffects();
-	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ASCharacter::BlackHoleAttack_CastAnimTimeElapsed, AttackAnimDelay);
-}
-
-void ASCharacter::BlackHoleAttack_CastAnimTimeElapsed() {
-	SpawnProjectile(BlackHoleClass);
+	ActionComp->StartActionByName(this, "Blackhole");
 }
 
 void ASCharacter::Dash() {
-	StartAttackEffects();
-	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASCharacter::Dash_CastAnimTimeElapsed, AttackAnimDelay);
+	ActionComp->StartActionByName(this, "Dash");
 }
 
-void ASCharacter::Dash_CastAnimTimeElapsed() {
-	SpawnProjectile(DashClass);
-}
-
-void ASCharacter::StartAttackEffects() {
-	PlayAnimMontage(AttackAnim);
-	UGameplayStatics::SpawnEmitterAttached(CastingEffect, GetMesh(), HandSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
-}
-
-void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn) {
-	if (ensureAlways(ClassToSpawn)) {
-		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;
-
-		FCollisionShape Shape;
-		Shape.SetSphere(20.0f);
-
-		//Ignore Player
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);
-
-		FCollisionObjectQueryParams ObjectParams;
-		ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-		ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
-		ObjectParams.AddObjectTypesToQuery(ECC_Pawn);
-
-		FVector TraceStart = CameraComp->GetComponentLocation();
-
-		//endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 10000);
-
-		//find new direction/rotation from hand pointing to impact point in world.
-		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
-
-		FHitResult Hit;
-		// returns true if we got to a blocking hit
-		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectParams, Shape, Params)) {
-			// Overwrite TraceEnd with impact point in world
-			TraceEnd = Hit.ImpactPoint;
-		}
-
-		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
-		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
-	}
-}
-
-// Called when the game starts or when spawned
-void ASCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-// Called every frame
-void ASCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	// -- Rotation Visualization -- //
-	const float DrawScale = 100.0f;
-	const float Thickness = 5.0f;
-
-	FVector LineStart = GetActorLocation();
-	// Offset to the right of pawn
-	LineStart += GetActorRightVector() * 100.0f;
-	// Set line end in direction of the actor's forward
-	FVector ActorDirection_LineEnd = LineStart + (GetActorForwardVector() * 100.0f);
-	// Draw Actor's Direction
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ActorDirection_LineEnd, DrawScale, FColor::Yellow, false, 0.0f, 0, Thickness);
-
-	FVector ControllerDirection_LineEnd = LineStart + (GetControlRotation().Vector() * 100.0f);
-	// Draw 'Controller' Rotation ('PlayerController' that 'possessed' this character)
-	DrawDebugDirectionalArrow(GetWorld(), LineStart, ControllerDirection_LineEnd, DrawScale, FColor::Green, false, 0.0f, 0, Thickness);
-}
+//// Called every frame
+//void ASCharacter::Tick(float DeltaTime)
+//{
+//	Super::Tick(DeltaTime);
+//
+//	// -- Rotation Visualization -- //
+//	const float DrawScale = 100.0f;
+//	const float Thickness = 5.0f;
+//
+//	FVector LineStart = GetActorLocation();
+//	// Offset to the right of pawn
+//	LineStart += GetActorRightVector() * 100.0f;
+//	// Set line end in direction of the actor's forward
+//	FVector ActorDirection_LineEnd = LineStart + (GetActorForwardVector() * 100.0f);
+//	// Draw Actor's Direction
+//	DrawDebugDirectionalArrow(GetWorld(), LineStart, ActorDirection_LineEnd, DrawScale, FColor::Yellow, false, 0.0f, 0, Thickness);
+//
+//	FVector ControllerDirection_LineEnd = LineStart + (GetControlRotation().Vector() * 100.0f);
+//	// Draw 'Controller' Rotation ('PlayerController' that 'possessed' this character)
+//	DrawDebugDirectionalArrow(GetWorld(), LineStart, ControllerDirection_LineEnd, DrawScale, FColor::Green, false, 0.0f, 0, Thickness);
+//}
 
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
