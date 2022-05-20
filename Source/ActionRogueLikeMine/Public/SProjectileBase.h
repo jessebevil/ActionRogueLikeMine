@@ -3,6 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "GameplayTagContainer.h"
 #include "SProjectileBase.generated.h"
 
 class USphereComponent;
@@ -20,7 +21,10 @@ public:
 	ASProjectileBase();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Attribute")
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float Damage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")

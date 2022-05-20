@@ -11,6 +11,7 @@
 #include "Camera/CameraShakeBase.h"
 #include "AttributeComponent.h"
 #include "SGameplayFunctionLibrary.h"
+#include "SActionComponent.h"
 
 static TAutoConsoleVariable<bool> CVarDebugProjectileHits(TEXT("su.DebugProjectileHits"), false, TEXT("Enable debug lines for Projectile Hits base class."), ECVF_Cheat);
 
@@ -67,6 +68,14 @@ void ASProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}*/
 
 	if (OtherActor && OtherActor != pInstigator) {
+		
+		USActionComponent* ActionComp = Cast<USActionComponent>(OtherActor->GetComponentByClass(USActionComponent::StaticClass()));
+		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag)) {
+			MoveComp->Velocity = -MoveComp->Velocity;
+			SetInstigator(Cast<APawn>(OtherActor));
+			return;
+		}
+
 		bool bDebugDraw = CVarDebugProjectileHits.GetValueOnGameThread();
 		if (bDebugDraw)
 			UE_LOG(LogTemp, Log, TEXT("ProjectileBase::OnActorHit - %s hit %s for %.2f"), *GetNameSafe(pInstigator), *GetNameSafe(OtherActor), Damage);
