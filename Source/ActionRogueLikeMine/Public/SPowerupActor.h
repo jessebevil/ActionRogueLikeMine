@@ -26,6 +26,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(EditAnywhere, Category = "Powerup")
+	int32 CreditCost;
+
 	
 	UPROPERTY(EditAnywhere, Category = "Powerup")
 	float RespawnTime;

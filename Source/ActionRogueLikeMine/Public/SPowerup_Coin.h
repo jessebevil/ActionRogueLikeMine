@@ -14,10 +14,12 @@ class ACTIONROGUELIKEMINE_API ASPowerup_Coin : public ASPowerupActor
 {
 	GENERATED_BODY()
 
-public:
-	ASPowerup_Coin();
+protected:
+	UPROPERTY(EditAnywhere, Category = "Credits")
+	int32 CreditsAmount;
 
+public:
 	void Interact_Implementation(APawn* InstigatorPawn) override;
-	
-	
+
+	ASPowerup_Coin();
 };

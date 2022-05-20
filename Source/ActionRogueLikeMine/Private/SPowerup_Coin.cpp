@@ -2,10 +2,10 @@
 
 
 #include "SPowerup_Coin.h"
-#include "AttributeComponent.h"
+#include "SPlayerState.h"
 
 ASPowerup_Coin::ASPowerup_Coin() {
-
+	CreditsAmount = 25;
 }
 
 void ASPowerup_Coin::Interact_Implementation(APawn* InstigatorPawn) {
@@ -13,14 +13,8 @@ void ASPowerup_Coin::Interact_Implementation(APawn* InstigatorPawn) {
 		return;
 	}
 
-	//Implement Coin logic for picking up and increasing coin count.
-
-	//UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(InstigatorPawn);
-	//// Check if not already at max health
-	//if (ensure(AttributeComp) && !AttributeComp->IsFullHealth()) {
-	//	// Only activate if healed successfully
-	//	if (AttributeComp->ApplyHealthChange(this, AttributeComp->GetHealthMax())) {
-	//		HideAndCooldownPowerup();
-	//	}
-	//}
+	if (ASPlayerState* PS = InstigatorPawn->GetPlayerState<ASPlayerState>()) {
+		PS->AddCredits(CreditsAmount);
+		HideAndCooldownPowerup();
+	}
 }

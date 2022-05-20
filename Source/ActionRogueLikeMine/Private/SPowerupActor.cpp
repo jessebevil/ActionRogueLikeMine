@@ -15,6 +15,8 @@ ASPowerupActor::ASPowerupActor()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComp->SetupAttachment(RootComponent);
 
+	CreditCost = 50;
+
 	RespawnTime = 10.0f;
 }
 
