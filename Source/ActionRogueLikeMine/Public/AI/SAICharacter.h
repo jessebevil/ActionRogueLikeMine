@@ -10,6 +10,7 @@ class UPawnSensingComponent;
 class UAttributeComponent;
 class UUserWidget;
 class USWorldUserWidget;
+class USActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKEMINE_API ASAICharacter : public ACharacter
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UAttributeComponent* AttributeComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);

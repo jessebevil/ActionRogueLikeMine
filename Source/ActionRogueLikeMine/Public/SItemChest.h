@@ -15,11 +15,10 @@ class ACTIONROGUELIKEMINE_API ASItemChest : public AActor, public ISGameplayInte
 	GENERATED_BODY()
 
 public:
+	ASItemChest();
 
 	UPROPERTY(EditAnywhere)
 	float TargetPitch;
-	// Sets default values for this actor's properties
-	ASItemChest();
 
 	void Interact_Implementation(APawn* InstigatorPawn);
 
@@ -30,11 +29,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* LidMesh;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(ReplicatedUsing="OnRep_LidOpened", BlueprintReadOnly)//RepNotify
+	bool bLidOpened;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	UFUNCTION()
+	void OnRep_LidOpened();
 };

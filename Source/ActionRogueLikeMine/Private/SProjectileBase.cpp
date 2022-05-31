@@ -12,6 +12,7 @@
 #include "AttributeComponent.h"
 #include "SGameplayFunctionLibrary.h"
 #include "SActionComponent.h"
+#include "SActionEffect.h"
 
 static TAutoConsoleVariable<bool> CVarDebugProjectileHits(TEXT("su.DebugProjectileHits"), false, TEXT("Enable debug lines for Projectile Hits base class."), ECVF_Cheat);
 
@@ -40,6 +41,7 @@ ASProjectileBase::ASProjectileBase()
 	ImpactShakeOuterRadius = 1500.0f;
 
 	Damage = 20.0f;
+	//SetReplicates(true);
 }
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
@@ -58,14 +60,7 @@ void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Oth
 }
 
 void ASProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	auto pInstigator = GetInstigator();
-	/*if (OtherActor && OtherActor != pInstigator) {
-		UAttributeComponent* AttributeComp = UAttributeComponent::GetAttributes(OtherActor);
-		if (AttributeComp) {
-			AttributeComp->ApplyHealthChange(GetInstigator(), Damage);
-		}
-		Explode();
-	}*/
+	APawn* pInstigator = GetInstigator();
 
 	if (OtherActor && OtherActor != pInstigator) {
 		
@@ -82,6 +77,10 @@ void ASProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, 
 
 		if (USGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult)) {
 			Explode();
+
+			if (ActionComp) {
+				ActionComp->AddAction(GetInstigator(), BurningActionClass);
+			}
 		}
 	}
 }

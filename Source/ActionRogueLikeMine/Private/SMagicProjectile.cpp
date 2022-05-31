@@ -26,18 +26,3 @@ void ASMagicProjectile::Explode_Implementation() {
 	SetActorEnableCollision(false);
 	Super::Explode_Implementation();
 }
-
-// Called when the game starts or when spawned
-void ASMagicProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
-// Called every frame
-void ASMagicProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

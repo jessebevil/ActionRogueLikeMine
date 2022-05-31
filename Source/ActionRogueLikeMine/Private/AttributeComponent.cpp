@@ -3,9 +3,18 @@
 
 #include "AttributeComponent.h"
 #include "SGameModeBase.h"
+#include "Net/UnrealNetwork.h"
 
 //Console Commands - Cheats
 static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplier"), 1.0f, TEXT("Global damage modifier for attribute component."), ECVF_Cheat);
+
+// Sets default values for this component's properties
+UAttributeComponent::UAttributeComponent()
+{
+	HealthMax = 100;
+	Health = HealthMax;
+	SetIsReplicatedByDefault(true);
+}
 
 bool UAttributeComponent::IsActorAlive(AActor* Actor) {
 	UAttributeComponent* AttributeComp = GetAttributes(Actor);
@@ -14,13 +23,6 @@ bool UAttributeComponent::IsActorAlive(AActor* Actor) {
 	}
 
 	return false;//If they have no concept of an Attribute component, should they be alive or dead? Dead in this case.
-}
-
-// Sets default values for this component's properties
-UAttributeComponent::UAttributeComponent()
-{
-	HealthMax = 100;
-	Health = HealthMax;
 }
 
 bool UAttributeComponent::Kill(AActor* IntigatorActor) {
@@ -59,7 +61,9 @@ bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta
 
 	float ActualDelta = Health - oldHealth;//Compare old health with new health to see if there was a change.
 
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, Delta);
+	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
+	if (ActualDelta != 0.0f)
+		MultiCast_HealthChanged(InstigatorActor, Health, ActualDelta);
 
 	if (ActualDelta < 0 && Health == 0.0f) {
 		ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
@@ -78,3 +82,18 @@ UAttributeComponent* UAttributeComponent::GetAttributes(AActor* FromActor) {
 
 	return nullptr;
 }
+
+void UAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UAttributeComponent, Health);
+	DOREPLIFETIME(UAttributeComponent, HealthMax);
+
+	//In the event you want only specific owner to see it. COND_InitialOnly = Could be if HealthMax is dynamic per spawn, but we only need it once.
+	//DOREPLIFETIME_CONDITION(UAttributeComponent, HealthMax, COND_OwnerOnly);
+}
+
+
+void UAttributeComponent::MultiCast_HealthChanged_Implementation(AActor* InstigatorActor, float NewHealth, float Delta) {
+	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+

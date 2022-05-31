@@ -11,6 +11,7 @@ class UProjectileMovementComponent;
 class UParticleSystemComponent;
 class UAudioComponent;
 class USoundCue;
+class USActionEffect;
 
 UCLASS(ABSTRACT)
 class ACTIONROGUELIKEMINE_API ASProjectileBase : public AActor
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float Damage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<USActionEffect> BurningActionClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects|Shake")
 	TSubclassOf<UCameraShakeBase> ImpactShake;

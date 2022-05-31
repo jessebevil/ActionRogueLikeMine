@@ -21,7 +21,7 @@ void USActionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	for (TSubclassOf<USAction> ActionClass : DefaultActions) {
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}	
 }
 
@@ -35,7 +35,7 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMsg);
 }
 
-void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass) {
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
 	if (!ensure(ActionClass)) {
 		return;
 	}
@@ -43,7 +43,18 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass) {
 	USAction* NewAction = NewObject<USAction>(this, ActionClass);
 	if (ensure(NewAction)) {
 		Actions.Add(NewAction);
+
+		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator))) {
+			NewAction->StartAction(Instigator);
+		}
 	}
+}
+
+void USActionComponent::RemoveAction(USAction* ActionToRemove) {
+	if (!ensure(ActionToRemove && !ActionToRemove->IsRunning()))
+		return;
+
+	Actions.Remove(ActionToRemove);
 }
 
 bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionName) {
@@ -54,6 +65,10 @@ bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionN
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
 				continue;
 			}
+
+			//If it's the client. Tell the server you want to start the action.
+			if (!GetOwner()->HasAuthority())
+				ServerStartAction(InstigatorActor, ActionName);
 
 			Action->StartAction(InstigatorActor);
 			return true;
@@ -74,5 +89,9 @@ bool USActionComponent::StopActionByName(AActor* InstigatorActor, FName ActionNa
 	}
 
 	return false;
+}
+
+void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName) {
+	StartActionByName(Instigator, ActionName);
 }
 

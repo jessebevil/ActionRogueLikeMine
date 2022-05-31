@@ -38,13 +38,19 @@ protected:
 
 	//Category = "Something" - display only for detail panels and blueprint context menu.
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes");
 	float Health;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes");
 	float HealthMax;
 
 	//HealthMax, Stamina, Strength, Mana, Crit chance, etc.
+	
+	/*UPROPERTY(ReplicatedUsing="") //Perhaps to make MultiCast_HealthChanged to unreliable later.
+	bool bIsAlive;*/
+
+	UFUNCTION(NetMulticast, Reliable) //@FIXME: mark as unreliable once we moved the 'state' out of SCharacter
+	void MultiCast_HealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
 
 public:
 	UFUNCTION(BlueprintCallable)

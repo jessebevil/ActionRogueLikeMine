@@ -149,7 +149,7 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* 
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 	}
 
-	if (NewHealth <= 0 && Delta < 0.0f) {
+	if (NewHealth <= 0.0f && Delta < 0.0f) {
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
 	}

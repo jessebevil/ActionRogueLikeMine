@@ -4,7 +4,6 @@
 #include "SAction.h"
 #include "SActionComponent.h"
 
-
 bool USAction::CanStart_Implementation(AActor* Instigator) {
 	if (IsRunning())
 		return false;
