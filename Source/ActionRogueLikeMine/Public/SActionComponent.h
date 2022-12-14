@@ -28,6 +28,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action") 
 	void RemoveAction(USAction* ActionToRemove);
 
+	/* Returns first occurance of action matching the class provided */
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	USAction* GetAction(TSubclassOf<USAction> ActionClass) const;
+
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StartActionByName(AActor* Instigator, FName ActionName);
 

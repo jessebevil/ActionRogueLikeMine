@@ -88,8 +88,8 @@ void USInteractionComponent::FindBestInteractable() {
 
 	bool bDebugDraw = CVarDebugDrawInteraction.GetValueOnGameThread();
 	if (bDebugDraw) {
-		DrawDebugSphere(GetWorld(), bBlockingHit ? Hit.ImpactPoint : End, TraceRadius, 32, LineColor, false, 2.0f);
-		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+		DrawDebugSphere(GetWorld(), bBlockingHit ? Hit.ImpactPoint : End, TraceRadius, 32, LineColor, false, 0.1f);
+		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 0.1f, 0, 2.0f);
 	}
 }
 

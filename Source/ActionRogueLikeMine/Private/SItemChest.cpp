@@ -2,7 +2,7 @@
 
 
 #include "SItemChest.h"
-#include "Net/UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"//Needed for DOREPLIFETIME macro
 
 // Sets default values
 ASItemChest::ASItemChest()
@@ -24,12 +24,13 @@ ASItemChest::ASItemChest()
 
 void ASItemChest::Interact_Implementation(APawn* InstigatorPawn) {
 	bLidOpened = !bLidOpened;
-	OnRep_LidOpened();
+	OnRep_LidOpened();//triggered automatically for clients. Servers must manually call it.
 }
 
 void ASItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	//DOREPLIFETIME(Class, Value) //This is what the C,V means in the macro.
 	DOREPLIFETIME(ASItemChest, bLidOpened);
 }
 

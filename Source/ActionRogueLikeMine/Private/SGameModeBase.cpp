@@ -67,6 +67,7 @@ void ASGameModeBase::SpawnBotTimerElapsed() {
 
 	static float MaxBotCount = 10.0f;//Default if no difficultyCurve has been implemented
 	if (DifficultyCurve) {
+		UE_LOG(LogTemp, Log, TEXT("Using difficulty curve"));
 		MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->TimeSeconds);
 	}
 

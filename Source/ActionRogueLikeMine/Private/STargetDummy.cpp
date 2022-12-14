@@ -17,7 +17,7 @@ ASTargetDummy::ASTargetDummy()
 }
 
 void ASTargetDummy::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* OwningComp, float NewHealth, float Delta) {
-    if (Delta < 0) {
+    if (Delta < 0.0f) {
         MeshComp->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
     }
 }

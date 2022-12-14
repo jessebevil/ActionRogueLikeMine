@@ -18,7 +18,8 @@ ASPowerupActor::ASPowerupActor()
 	CreditCost = 50;
 
 	RespawnTime = 10.0f;
-	SetReplicates(true);
+	bReplicates = true;
+	//SetReplicates(true);
 }
 
 void ASPowerupActor::Interact_Implementation(APawn* IntigatorPawn) {

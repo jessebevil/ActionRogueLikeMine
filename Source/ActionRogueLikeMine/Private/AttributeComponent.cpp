@@ -13,7 +13,15 @@ UAttributeComponent::UAttributeComponent()
 {
 	HealthMax = 100;
 	Health = HealthMax;
+
+	RageMax = 100;
+	Rage = 0;
+
 	SetIsReplicatedByDefault(true);
+}
+
+bool UAttributeComponent::Kill(AActor* InstigatorActor) {
+	return ApplyHealthChange(InstigatorActor, -GetHealthMax());
 }
 
 bool UAttributeComponent::IsActorAlive(AActor* Actor) {
@@ -23,10 +31,6 @@ bool UAttributeComponent::IsActorAlive(AActor* Actor) {
 	}
 
 	return false;//If they have no concept of an Attribute component, should they be alive or dead? Dead in this case.
-}
-
-bool UAttributeComponent::Kill(AActor* IntigatorActor) {
-	return ApplyHealthChange(IntigatorActor, -GetHealthMax());
 }
 
 bool UAttributeComponent::IsAlive() const {
@@ -43,6 +47,23 @@ float UAttributeComponent::GetHealth() {
 
 float UAttributeComponent::GetHealthMax() const {
 	return HealthMax;
+}
+
+float UAttributeComponent::GetRage() const {
+	return Rage;
+}
+
+bool UAttributeComponent::ApplyRage(AActor* InstigatorActor, float Delta) {
+	float OldRage = Rage;
+
+	Rage = FMath::Clamp(Rage + Delta, 0.0f, RageMax);
+
+	float ActualDelta = Rage - OldRage;
+	if (ActualDelta != 0.0f) {
+		OnRageChanged.Broadcast(InstigatorActor, this, Rage, ActualDelta);
+	}
+
+	return ActualDelta != 0.0f;
 }
 
 bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta) {
@@ -87,8 +108,11 @@ void UAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UAttributeComponent, Health);
 	DOREPLIFETIME(UAttributeComponent, HealthMax);
+	DOREPLIFETIME(UAttributeComponent, Rage);
+	DOREPLIFETIME(UAttributeComponent, RageMax);
 
 	//In the event you want only specific owner to see it. COND_InitialOnly = Could be if HealthMax is dynamic per spawn, but we only need it once.
+	// You would use this instead of DOREPLIFETIME(UAttributeComponent, HealthMax);
 	//DOREPLIFETIME_CONDITION(UAttributeComponent, HealthMax, COND_OwnerOnly);
 }
 

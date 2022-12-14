@@ -10,7 +10,7 @@ USActionComponent::USActionComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	//SetIsReplicatedByDefault(true);
 	// ...
 }
 
@@ -36,7 +36,7 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 }
 
 void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
-	if (!ensure(ActionClass)) {
+	if (!ActionClass) {
 		return;
 	}
 
@@ -57,6 +57,19 @@ void USActionComponent::RemoveAction(USAction* ActionToRemove) {
 	Actions.Remove(ActionToRemove);
 }
 
+USAction* USActionComponent::GetAction(TSubclassOf<USAction> ActionClass) const
+{
+	for (USAction* Action : Actions)
+	{
+		if (Action && Action->IsA(ActionClass))
+		{
+			return Action;
+		}
+	}
+
+	return nullptr;
+}
+
 bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionName) {
 	for (USAction* Action : Actions) {
 		if (Action && Action->ActionName == ActionName) {
@@ -66,7 +79,7 @@ bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionN
 				continue;
 			}
 
-			//If it's the client. Tell the server you want to start the action.
+			//If it's the client. Tell the server you want to start the action. If it's the server, don't repeat it forever.
 			if (!GetOwner()->HasAuthority())
 				ServerStartAction(InstigatorActor, ActionName);
 

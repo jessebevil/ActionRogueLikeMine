@@ -41,7 +41,7 @@ ASProjectileBase::ASProjectileBase()
 	ImpactShakeOuterRadius = 1500.0f;
 
 	Damage = 20.0f;
-	//SetReplicates(true);
+	SetReplicates(true);
 }
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
