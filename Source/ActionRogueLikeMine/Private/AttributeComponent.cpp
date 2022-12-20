@@ -53,7 +53,7 @@ float UAttributeComponent::GetRage() const {
 	return Rage;
 }
 
-bool UAttributeComponent::ApplyRage(AActor* InstigatorActor, float Delta) {
+bool UAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta) {
 	float OldRage = Rage;
 
 	Rage = FMath::Clamp(Rage + Delta, 0.0f, RageMax);
@@ -84,7 +84,7 @@ bool UAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta
 
 	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
 	if (ActualDelta != 0.0f)
-		MultiCast_HealthChanged(InstigatorActor, Health, ActualDelta);
+		MultiCast_AttributeChanged(InstigatorActor, Health, ActualDelta);
 
 	if (ActualDelta < 0 && Health == 0.0f) {
 		ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
@@ -116,8 +116,7 @@ void UAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	//DOREPLIFETIME_CONDITION(UAttributeComponent, HealthMax, COND_OwnerOnly);
 }
 
-
-void UAttributeComponent::MultiCast_HealthChanged_Implementation(AActor* InstigatorActor, float NewHealth, float Delta) {
-	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+void UAttributeComponent::MultiCast_AttributeChanged_Implementation(AActor* InstigatorActor, float NewValue, float Delta) {
+	OnRageChanged.Broadcast(InstigatorActor, this, NewValue, Delta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, NewValue, Delta);
 }
-

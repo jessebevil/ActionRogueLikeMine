@@ -151,7 +151,7 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, UAttributeComponent* 
 
 		// Rage added equal to damage received (Abs to turn into positive rage number)
 		float RageDelta = FMath::Abs(Delta);
-		AttributeComp->ApplyRage(InstigatorActor, RageDelta);
+		AttributeComp->ApplyRageChange(InstigatorActor, RageDelta);
 	}
 
 	// Died

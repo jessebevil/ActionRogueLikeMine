@@ -7,7 +7,7 @@
 #include "AttributeComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, UAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, UAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRageChanged, AActor*, InstigatorActor, UAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
 
 // Alternative: Share the same signature with generic names.
@@ -59,8 +59,11 @@ protected:
 	/*UPROPERTY(ReplicatedUsing="") //Perhaps to make MultiCast_HealthChanged to unreliable later.
 	bool bIsAlive;*/
 
+	//UFUNCTION(NetMulticast, Reliable) //@FIXME: mark as unreliable once we moved the 'state' out of SCharacter
+	//void MultiCast_HealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+
 	UFUNCTION(NetMulticast, Reliable) //@FIXME: mark as unreliable once we moved the 'state' out of SCharacter
-	void MultiCast_HealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+	void MultiCast_AttributeChanged(AActor* InstigatorActor, float NewValue, float Delta);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
@@ -81,18 +84,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attribute")
 	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
 
-	UPROPERTY(BlueprintAssignable, Category = "Attributes")
-	FOnHealthChanged OnHealthChanged;
+	//UPROPERTY(BlueprintAssignable, Category = "Attributes")
+	//FOnHealthChanged OnHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Attributes")
 	FOnAttributeChanged OnRageChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Attributes")
-	FOnAttributeChanged OnHealthChanged2;
+	FOnAttributeChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable)
 	float GetRage() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyRage(AActor* InstigatorActor, float Delta);
+	bool ApplyRageChange(AActor* InstigatorActor, float Delta);
 };

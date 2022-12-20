@@ -18,6 +18,7 @@ ASBlackHole::ASBlackHole() {
 	ForceComp->Radius = 750;
 	ForceComp->bImpulseVelChange = true;
 	DetonationDelay = 5.0f;
+	RageCost = 20.0f;
 }
 
 void ASBlackHole::BeginPlay() {

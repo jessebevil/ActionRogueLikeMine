@@ -20,6 +20,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Explode")
 	float DetonationDelay;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Resource")
+	float RageCost;
+
 	UPROPERTY(EditDefaultsOnly, Category = "ForceComp")
 	URadialForceComponent* ForceComp;
 
